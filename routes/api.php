@@ -2,7 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,8 +19,13 @@ use App\Http\Controllers\AuthController;
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
 // });
-
+// Route::middleware('auth:sanctum')->get('/profile',[UserController::class, "profile"]);
 
 Route::post('/registration',[AuthController::class, "registration"]);
 Route::post('/auth',[AuthController::class, "auth"]);
-Route::middleware('auth:sanctum')->delete('/logout',[AuthController::class, "logout"]);
+
+Route::middleware('auth:sanctum')->group(function(){
+    Route::delete('/logout',[AuthController::class, "logout"]);
+    Route::get('/profile',[UserController::class, "profile"]);
+    Route::patch('/profile',[UserController::class, "update"]);
+});
