@@ -20,7 +20,7 @@ class CreateVideosTable extends Migration
             $table->text('description');
             $table->string('video_path', 100)->nullable()->default(null);
             $table->string('cover_path', 100)->nullable()->default(null);
-            $table->string('status')->default('on-check');
+            $table->string('status')->default('on-check'); // on-check, archived, re-check
             $table->timestamps();
         });
     }

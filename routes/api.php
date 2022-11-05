@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\VideoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,4 +29,9 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::delete('/logout',[AuthController::class, "logout"]);
     Route::get('/profile',[UserController::class, "profile"]);
     Route::patch('/profile',[UserController::class, "update"]);
+
+    Route::get('/videos/my',[VideoController::class, "list"]);
+    Route::post('/videos',[VideoController::class, "store"]);
+    Route::patch('/videos/{video}',[VideoController::class, "update"]);
+    Route::delete('/videos/{video}',[VideoController::class, "delete"]);
 });
