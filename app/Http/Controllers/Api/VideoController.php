@@ -2,66 +2,41 @@
 
 namespace App\Http\Controllers\Api;
 
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\VideoRequest;
-use App\Http\Requests\VideoUpdateRequest;
-use App\Http\Resources\MyVideoResource;
+use App\Http\Resources\VideoFullResource;
+use App\Http\Resources\VideoResource;
 use App\Models\Video;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-
 use Illuminate\Support\Facades\Auth;
 
 class VideoController extends Controller
 {
-
-
-    public function list()
+    public function search()
     {
-        return MyVideoResource::collection(Auth::user()->videos);
+        $perPage = \request('per_page', 10);
+        $videos = Video::query()
+        //->where('status', 'publish')
+        ->orderBy('created_at', 'DESC');
+        return VideoResource::collection($videos->paginate($perPage));
     }
 
-
-    public function store(VideoRequest $request): Response
+    public function show(Video $video)
     {
-
-        /** @var Video $video */
-        $video = Auth::user()->videos()->create($request->validated());
-        $video->uploadVideo($request->file('video_file'));
-        $video->uploadCover($request->file('cover_file'));
-
-        return response()->noContent();
+        return VideoFullResource::make($video);
     }
 
-    public function update(Video $video, VideoUpdateRequest $request): Response
+    public function like(Video $video)
     {
-
-        if ($video->user_id != Auth::user()->id) {
-            return response()->json([
-                'message' => 'Forbidden',
-            ], 403);
+        if (!$video->toggleLike()) {
+            $video->likes()->create([
+                'user_id' => Auth::id(),
+            ]);
+        } else {
+            $video->likes()->where('user_id', Auth::id())->delete();
         }
-
-        $videoData = [
-            'status' => 'on-check'
-        ];
-
-        $video->uploadVideo($request->file('video_file'));
-        $video->uploadCover($request->file('cover_file'));
-
-        $video->update($videoData + $request->validated());
-        return response()->noContent();
-    }
-
-    public function delete(Video $video)
-    {
-        if ($video->user_id != Auth::user()->id) {
-            return response()->json([
-                'message' => 'Forbidden',
-            ], 403);
-        }
-        $video->delete();
         return response()->noContent();
     }
 }

@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
-
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Http\UploadedFile;
-use Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class Video extends Model
 {
@@ -21,9 +25,34 @@ class Video extends Model
         'status',
     ];
 
+    public function likes()
+    {
+        return $this->hasMany(VideoLike::class, 'video_id', 'id');
+    }
+
+    public function toggleLike()
+    {
+        return $this->likes()->where('user_id', Auth::id())->exists();
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'video_id', 'id');
+    }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'id', 'user_id');
+    }
+
     public function getVideoUrlAttribute()
     {
         return url(Storage::url($this->video_path));
+    }
+
+    public function getCoverUrlAttribute()
+    {
+        return url(Storage::url($this->cover_path));
     }
 
     public function uploadVideo(?UploadedFile $file)
